@@ -7,50 +7,57 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Introduzca la ruta de la carpeta que desea recorrer sus fotos .HEIC");
+        Console.WriteLine("Introduzca la ruta de la carpeta que desea recorrer sus fotos .HEIC:");
+        string rutaEntrada = Console.ReadLine();
 
-        string rutaPrincipal = Console.ReadLine();
+        Console.WriteLine("Introduzca la ruta de salida para las fotos .JPG:");
+        string rutaSalida = Console.ReadLine();
 
-        // Buscar primero en la carpeta raíz
-        string[] archivosRaiz = Directory.GetFiles(rutaPrincipal, "*.HEIC");
-        foreach (string archivo in archivosRaiz)
-        {      
-            Console.WriteLine($"Archivo en raíz: {archivo}");
-        }
+        if (!Directory.Exists(rutaSalida))
+            Directory.CreateDirectory(rutaSalida);
 
-        // Obtener todas las carpetas dentro de la ruta principal
-        string[] carpetas = Directory.GetDirectories(rutaPrincipal);
+        string[] archivos = Directory.GetFiles(rutaEntrada, "*.HEIC", SearchOption.AllDirectories);
 
-        foreach (string carpeta in carpetas)
+        int contador = 1;
+
+        foreach (string archivo in archivos)
         {
-            Console.WriteLine($"Carpeta: {carpeta}");
+            string nombreArchivo = Path.GetFileNameWithoutExtension(archivo);
 
-            // Obtener los archivos dentro de cada carpeta
-            string[] archivos = Directory.GetFiles(carpeta, "*.HEIC");
-
-            foreach (string archivo in archivos)
+            try
             {
-                Console.WriteLine($"\tArchivo: {archivo}");
+                ConvertidorIMG(archivo, rutaSalida, nombreArchivo);
+                Console.WriteLine($"[{contador}] Convertido: {archivo}");
             }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error en {archivo}: {e.Message}");
+            }
+
+            contador++;
         }
 
-        Console.WriteLine("Recorrido completado.");
+        Console.WriteLine("Conversión completada.");
+    }
+
+    public static void ConvertidorIMG(string archivoEntrada, string rutaSalida, string nombreArchivo)
+    {
+        // Cargar a input imagen
+
+        using (MagickImage image = new MagickImage(archivoEntrada))
+        {
+            // Convertir formato
+
+            image.Format = MagickFormat.Jpg;
+
+            string rutaFinal = Path.Combine(rutaSalida, nombreArchivo + ".jpg");
+
+            // Guardar imagen
+            image.Write(rutaFinal);
+        }
     }
 }
 
-    //public void ConvertidorIMG(string rutaIMG)
-    //{
-    //    // Cargar a input imagen
 
-    //    using (MagickImage image = new MagickImage("image\\IMG_0011.HEIC"))
-    //    {
-    //        // Convertir formato
-
-    //        image.Format = MagickFormat.Png;
-
-    //        // Guardar imagen
-    //        image.Write("image\\IMG_0011.png");
-    //    }
-    //}
 
 
